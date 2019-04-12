@@ -1,0 +1,12 @@
+eclipse.preferences.version=1
+encoding//src/main/java=UTF-8
+encoding//src/main/resources/db.properties=UTF-8
+encoding//src/main/resources/log4j.properties=UTF-8
+encoding//src/main/resources/mybatis=UTF-8
+encoding//src/main/resources/resources/messages.properties=UTF-8
+encoding//src/main/resources/spring=UTF-8
+encoding//src/main/resources/yycg/base/dao/mapper=UTF-8
+encoding//src/main/resources/yycg/base/dao/mapper/BasicinfoMapper.xml=UTF-8
+encoding//src/main/resources/yycg/base/dao/mapper/SysuserMapperCustom.xml=UTF-8
+encoding//src/test/java=UTF-8
+encoding//src/test/java/yycg/base/dao/mapper=UTF-8

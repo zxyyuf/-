@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="yycg.business.dao.mapper.GysypmlMapperCustom">
+
+
+	<!-- 供货商药品目录查询条件 -->
+	<sql id="query_gysypml_where">
+		<if test="gysypmlCustom!=null">
+			<if test="gysypmlCustom.usergysid!=null and gysypmlCustom.usergysid!=''">
+				and gysypml.usergysid = #{gysypmlCustom.usergysid}
+			</if>
+			<if test="gysypmlCustom.ypxxid!=null and gysypmlCustom.ypxxid!=''">
+				and gysypml.ypxxid = #{gysypmlCustom.ypxxid}
+			</if>
+		</if>
+
+	</sql>
+	<!-- 供货商目录控制查询条件 -->
+	<sql id="query_gysypmlcontrol_where">
+		<if test="gysypmlCustom!=null">
+			<if test="gysypmlCustom.control!=null and gysypmlCustom.control!=''">
+				and gysypml_control.control = #{gysypmlCustom.control}
+			</if>
+			<if test="gysypmlCustom.usergysid!=null and gysypmlCustom.usergysid!=''">
+				and gysypml_control.usergysid = #{gysypmlCustom.usergysid}
+			</if>
+			<if test="gysypmlCustom.ypxxid!=null and gysypmlCustom.ypxxid!=''">
+				and gysypml_control.ypxxid = #{gysypmlCustom.ypxxid}
+			</if>
+		</if>
+
+	</sql>
+
+	<!-- 供货商药品目录查询 -->
+	<select id="findGysypmlList" parameterType="yycg.business.pojo.vo.GysypmlQueryVo"
+		resultType="yycg.business.pojo.vo.GysypmlCustom">
+			SELECT
+		gysypml.id gysypmlid,
+		gysypml.ypxxid,
+		gysypml.usergysid,
+		usergys.MC usergysmc,
+		gysypml_control.control,
+		(
+			SELECT
+				info
+			FROM
+				dictinfo
+			WHERE
+				TYPECODE = '008'
+			AND DICTCODE = gysypml_control.CONTROL
+		) controlmc,
+		ypxx.id,
+		ypxx.bm,
+		ypxx.mc,
+		ypxx.jx,
+		ypxx.gg,
+		ypxx.zhxs,
+		ypxx.scqymc,
+		ypxx.spmc,
+		ypxx.zbjg,
+		ypxx.jyzt,
+		(
+			SELECT
+				info
+			FROM
+				dictinfo
+			WHERE
+				ypxx.jyzt = dictcode
+			AND typecode = '003'
+		) jyztmc
+	FROM
+		gysypml,
+		usergys,
+		gysypml_control,
+		ypxx
+	WHERE
+		gysypml.USERGYSID = usergys.ID
+	AND gysypml.YPXXID = gysypml_control.YPXXID
+	AND gysypml.USERGYSID = gysypml_control.USERGYSID
+	AND gysypml.YPXXID =ypxx.ID
+		<include refid="query_gysypml_where" />
+		<include refid="query_gysypmlcontrol_where" />
+		
+		<!-- 药品查询条件 -->
+		<include refid="yycg.business.dao.mapper.YpxxMapperCustom.query_ypxx_where" />
+		<if test="pageQuery!=null">
+			limit ${pageQuery.PageQuery_start}, ${pageQuery.PageQuery_end}
+		</if>
+	</select>
+
+	<!-- 供货商药品目录控制表查询列表-->
+	<select id="findGysypmlControlList" parameterType="yycg.business.pojo.vo.GysypmlQueryVo"
+		resultType="yycg.business.pojo.vo.GysypmlCustom">
+		SELECT
+		gysypml_control.id gysypmlid,
+		usergys.id usergysid,
+		usergys.mc usergysmc,
+		gysypml_control.control,
+		(select info from dictinfo where typecode='008' and dictcode=gysypml_control.control) controlmc,
+		gysypml_control.advice,
+			ypxx.id,
+			ypxx.bm,
+			ypxx.mc,
+			ypxx.jx,
+			ypxx.gg,
+			ypxx.zhxs,
+			ypxx.scqymc,
+			ypxx.spmc,
+			ypxx.zbjg,
+			ypxx.jyzt,
+			(
+				SELECT
+					info
+				FROM
+					dictinfo
+				WHERE
+					ypxx.jyzt = dictcode
+				AND typecode = '003'
+			) jyztmc
+		FROM
+			gysypml_control,
+			ypxx,
+		 usergys
+		WHERE
+			gysypml_control.ypxxid = ypxx.id
+		AND gysypml_control.usergysid=USERGYS.id
+		<!-- 控制状态查询条件 -->
+		<include refid="query_gysypmlcontrol_where" />
+		<!-- 药品查询条件 -->
+		<include refid="yycg.business.dao.mapper.YpxxMapperCustom.query_ypxx_where" />		
+		<!-- 供货商查询条件 -->
+		<include refid="yycg.base.dao.mapper.SysuserMapperCustom.query_usergys_where"/>
+		<if test="pageQuery!=null">
+			limit ${pageQuery.PageQuery_start}, ${pageQuery.PageQuery_end}
+		</if>
+	
+	</select>
+	
+	<!-- 供货商药品目录控制表查询总数-->
+	<select id="findGysypmlControlCount" parameterType="yycg.business.pojo.vo.GysypmlQueryVo"
+		resultType="int">
+		SELECT count(*)
+		FROM
+			gysypml_control,
+			ypxx,
+		 usergys
+		WHERE
+			gysypml_control.ypxxid = ypxx.id
+		AND gysypml_control.usergysid=USERGYS.id
+		<!-- 控制状态查询条件 -->
+		<include refid="query_gysypmlcontrol_where" />
+		<!-- 药品查询条件 -->
+		<include refid="yycg.business.dao.mapper.YpxxMapperCustom.query_ypxx_where" />		
+		<!-- 供货商查询条件 -->
+		<include refid="yycg.base.dao.mapper.SysuserMapperCustom.query_usergys_where"/>
+		
+	
+	</select>
+	
+	<!-- 供货商药品目录查询总数 -->
+	<select id="findGysypmlCount" parameterType="yycg.business.pojo.vo.GysypmlQueryVo"
+		resultType="int">
+
+
+		select count(1)
+
+		from gysypml, usergys, gysypml_control, ypxx
+		where gysypml.usergysid = usergys.id
+		and gysypml.ypxxid = gysypml_control.ypxxid
+		and gysypml.usergysid = gysypml_control.usergysid
+		and gysypml.ypxxid = ypxx.id
+
+		<include refid="query_gysypml_where" />
+		<include refid="query_gysypmlcontrol_where" />
+		<!-- 药品查询条件 -->
+		<include refid="yycg.business.dao.mapper.YpxxMapperCustom.query_ypxx_where" />
+
+
+	</select>
+	
+	<!-- 供货商添加药品目录 查询 -->
+	<select id="findAddGysypmlList" parameterType="yycg.business.pojo.vo.GysypmlQueryVo"
+		resultType="yycg.business.pojo.vo.GysypmlCustom">
+		
+	
+	 SELECT
+			ypxx.id,
+			ypxx.bm,
+			ypxx.mc,
+			ypxx.jx,
+			ypxx.gg,
+			ypxx.zhxs,
+			ypxx.scqymc,
+			ypxx.spmc,
+			ypxx.zbjg,
+			ypxx.jyzt,
+			(
+				SELECT
+					info
+				FROM
+					dictinfo
+				WHERE
+					ypxx.jyzt = dictcode
+				AND typecode = '003'
+			) jyztmc
+		FROM
+			ypxx
+		WHERE
+			NOT EXISTS (
+				SELECT
+					ID
+				FROM
+					gysypml
+				WHERE
+					usergysid = #{gysypmlCustom.usergysid}
+				AND ypxx.id = gysypml.ypxxid
+			)	
+
+		
+		<!-- 药品查询条件 -->
+		<include refid="yycg.business.dao.mapper.YpxxMapperCustom.query_ypxx_where" />
+		<if test="pageQuery!=null">
+			limit ${pageQuery.PageQuery_start}, ${pageQuery.PageQuery_end}
+		</if>
+		
+	</select>
+	<!-- 供货商添加药品目录查询列表总数 -->
+	<select id="findAddGysypmlCount" parameterType="yycg.business.pojo.vo.GysypmlQueryVo"
+		resultType="int">
+	
+
+		select count(*)
+		from ypxx
+
+		WHERE
+			NOT EXISTS (
+				SELECT
+					ID
+				FROM
+					gysypml
+				WHERE
+					usergysid = #{gysypmlCustom.usergysid}
+				AND ypxx.id = gysypml.ypxxid
+			)	
+		
+		<!-- 药品查询条件 -->
+		<include refid="yycg.business.dao.mapper.YpxxMapperCustom.query_ypxx_where" />
+
+	</select>
+
+
+	
+</mapper>
